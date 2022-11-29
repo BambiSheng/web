@@ -1,0 +1,1 @@
+gcc httpd.c -lwsock32
