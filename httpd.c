@@ -2,14 +2,10 @@
 #include<winsock2.h>
 #include<stdlib.h>
 #pragma comment(lib, "ws2_32.lib")
-
+#define printf_str(str) printf("[%s - %d]"#str"=%s\n",__func__,__LINE__,str)
 void error_die(const char*str){
   perror(str);
   exit(1);
-}
-
-void printf_str(const char* str){
-  printf("[%s - %d]%s",__func__,__LINE__,str);
 }
 
 int startup(unsigned short * port){
@@ -99,13 +95,51 @@ int get_line(int sock, char* buff,int size){
   buff[i] = 0;
   return i;
 }
+
+void unimplement(int client){
+  //to client
+
+}
+
+
+
+
 DWORD WINAPI accept_request(LPVOID arg){
   char buff[1024];
   int client = (SOCKET)arg;
   //read
   int numberchars = get_line(client, buff, sizeof(buff));
   printf_str(buff);
-  
+  int j = 0,i = 0;
+  char method[255];
+  while(!isspace(buff[j]) && j < sizeof(method)-1){
+    method[j]=buff[i];
+    j++;
+    i++;
+  }
+  method[i]=0;
+  printf_str(method);
+  if(stricmp(method,"GET") && stricmp(method, "POST")){
+    unimplement(client);
+    return 0;
+  }
+
+  char url[255];//resource path
+  i = 0;
+  while(isspace(buff[j]) && j < sizeof(buff)){
+    j++;
+  }
+
+  while(!isspace(buff[j]) && i < sizeof(url)-1 && j< sizeof(buff)){
+    url[i]=buff[j];
+    i++;
+    j++;
+  }
+url[i]=0;
+printf_str(url);
+
+
+
 
 
   return 0;

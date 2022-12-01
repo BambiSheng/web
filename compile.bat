@@ -1,1 +1,1 @@
-gcc httpd.c -lwsock32
+gcc client.cpp -lwsock32
