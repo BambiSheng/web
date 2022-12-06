@@ -8,12 +8,15 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #define BUFSIZE 50
+
+//为了简化代码，封装的发送数据以及报错函数
 void msgsend(char *msg,int clnt_sock){
   int ret = write(clnt_sock, msg, sizeof(msg));
   if (ret < 0){
     printf("Write error ...\n");
   }
 }
+//这是判断胜负结果的函数
 void  judge(char *board){
   char *temp=board+3;
   if(!strcmp(temp,"111")||!strcmp(temp,"222")||!strcmp(temp,"333")||!strcmp(temp,"123")||!strcmp(temp,"132")||!strcmp(temp,"213")||!strcmp(temp,"231")||!strcmp(temp,"312")||!strcmp(temp,"321")){
@@ -54,6 +57,7 @@ void  judge(char *board){
 }
 
 int main(){
+  //一些初始化
     int serv_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 
@@ -67,7 +71,7 @@ int main(){
 
     listen(serv_sock, 20);
 
-
+    //连接三个客户端的套接字，并发送欢迎信息
     struct sockaddr_in clnt_addr_1;
     socklen_t clnt_addr_size_1 = sizeof(clnt_addr_1);
     int clnt_sock_1 = -1;
@@ -106,6 +110,7 @@ int main(){
          }
     } while(clnt_sock_3 < 0);
     
+    //向客户端发送开始信息
      char cln_3_login_msg[]={"3"};
     msgsend(cln_3_login_msg,clnt_sock_3);
 
@@ -118,7 +123,7 @@ int main(){
     while(1) {
         
 
-
+        //接受来自三个客户端的数据
 
         char strBuffer1[BUFSIZE];
         int dataLength1 = read(clnt_sock_1, strBuffer1, sizeof(strBuffer1)-1);
@@ -143,23 +148,23 @@ int main(){
             continue;
         }
         printf("The server has already got the data from player 3: %s\n", strBuffer3);
-        
+        //说明：发回的board共有六个有效字节，前三位存储胜负信息（胜者记为1）；后三位存储选择信息（1/2/3）
         board[3]=strBuffer1[0];
         board[4]=strBuffer2[0];
         board[5]=strBuffer3[0];
-
+        //调用判断胜负的函数
         judge(board);
-
+        //发回数据
         msgsend(board,clnt_sock_1);
         msgsend(board,clnt_sock_2);
         msgsend(board,clnt_sock_3);
+        //对缓冲区清零
         memset(board,0,sizeof(board));
-
-        
         memset(strBuffer1, 0, BUFSIZE);
         memset(strBuffer2, 0, BUFSIZE);
         memset(strBuffer3, 0, BUFSIZE);
     }
+    //关闭套接字
     close(clnt_sock_1);
     close(clnt_sock_2);
     close(serv_sock);

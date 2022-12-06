@@ -1,11 +1,13 @@
-// WindowsClient.c
+// WindowsClient.cpp
  
 #include <stdio.h>
 #include <stdlib.h>
 #include <WinSock2.h>
-#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
+#pragma comment(lib, "ws2_32.lib") 
  
 #define BUF_SIZE 100
+
+//report是根据服务器返回的数据，报告本轮游戏各个玩家的选择情况与获胜情况
 void report(char* board,int* points){
   int draw=1;
   for(int i=0;i<=2;i++){
@@ -59,7 +61,7 @@ int main(){
 	 	if (rec_welcome < 0) {
 		 	printf("Receive error, PLS check your network ...\n");
 		 }
-	  printf("Welcome! You are player %s.\n", welcome);
+	  printf("Welcome! You are player %s.\n", welcome);   //欢迎界面，根据与服务器连接的先后顺序分别命名为player1，2，3
     if(welcome[0] == '1'){
       printf("Waiting for player 2 & player 3...\n");
     }
@@ -78,17 +80,17 @@ int main(){
     int points[3]={0,0,0};
 
     while(1) {
-    round++;
+    round++;            //这是记分牌
     printf("Round%d\npoints:\nplayer1: %d\nplayer2: %d\nplayer3: %d\n",round,points[0],points[1],points[2]);
     printf("rock --> 1\nscissors --> 2\npaper --> 3\nyour choice:\n");
 
     char bufSend[BUF_SIZE] = {0};
-    scanf("%s", bufSend);
+    scanf("%s", bufSend);                     
 	  while(strcmp(bufSend,"1") && strcmp(bufSend,"2") && strcmp(bufSend,"3")){
-    printf("Input error.Enter 1/2/3:\n");
+    printf("Input error.Enter 1/2/3:\n");                //有检查输入合法性的机制
     scanf("%s", bufSend);
     }
-    
+    //向服务器发送数据
     int sendLen = send(sock, bufSend, strlen(bufSend), 0);
 	  if (sendLen < 0) {
 		printf("Send Error, PLS Check your network ...\n");
@@ -96,15 +98,15 @@ int main(){
 	  }
     
     printf("Waiting for other players...\n");
-
+    //所有玩家选择情况全部发送完毕后，服务器会发回结果，输赢情况  
     char board[BUF_SIZE] = {0};
 	  memset(board,0, sizeof(board));
-    int rec_board = recv(sock, board, BUF_SIZE, 0);
+    int rec_board = recv(sock, board, BUF_SIZE, 0);//接收数据
 	 	if (rec_board < 0) {
 		 	printf("Receive error, PLS check your network ...\n");
 		}
 
-    report(board,points);
+    report(board,points);//向玩家报告结果
 
 
 		
